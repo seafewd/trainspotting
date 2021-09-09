@@ -1,18 +1,19 @@
 import TSim.CommandException;
 import TSim.SensorEvent;
 import TSim.TSimInterface;
+import static java.lang.Thread.sleep;
 
 public class Train implements Runnable {
 
     private final int TRAIN_ID;
     private int speed;
-    private boolean direction;
+    private boolean forwardDirection;
     public TSimInterface tsi = TSimInterface.getInstance(); // Change to private?
 
     public Train(int TRAIN_ID, int speed, boolean direction) {
         this.TRAIN_ID = TRAIN_ID;
         this.speed = speed;
-        this.direction = direction;
+        this.forwardDirection = direction;
     }
 
 
@@ -24,22 +25,45 @@ public class Train implements Runnable {
             try {
                 SensorEvent se = tsi.getSensor(TRAIN_ID);
 
-                if (se.getXpos() == 7 && se.getYpos() == 7 && se.getStatus() == SensorEvent.ACTIVE)
-                    System.out.println("Houston, we've got contact. dick n balls");
+                //tsi.setSpeed(1,15);
+                tsi.setSwitch(17, 7, 2);
+                tsi.setSwitch(15, 9, 2);
+                tsi.setSwitch(3,11, 2);
 
 
-                /*
-                if (se.getXpos() ==  && se.getYpos() == 11 && se.getStatus() == SensorEvent.ACTIVE) {
+
+                //if (se.getXpos() == 7 && se.getYpos() == 7 && se.getStatus() == SensorEvent.ACTIVE)
+
+
+                // North train station
+                if (se.getXpos() == 14 && se.getYpos() == 3 && se.getStatus() == SensorEvent.ACTIVE) {
                     // to South
-                    if (!direction) {
-                        tsi.setSpeed(id, 0);
-                        fourWay.acquire();
-                        tsi.setSpeed(id, speed);
+                    if (!forwardDirection) {
+                        tsi.setSpeed(TRAIN_ID, 0);
+                        sleep(2000);
+                        tsi.setSpeed(TRAIN_ID, speed);
+                        forwardDirection = !forwardDirection;
                         // to North
                     } else {
-                        fourWay.release();
+                        //fourWay.release();
                     }
-                }*/
+                }
+
+                // South train station
+                if (se.getXpos() == 14 && se.getYpos() == 13 && se.getStatus() == SensorEvent.ACTIVE) {
+                    // to South
+                    if (forwardDirection) {
+                        tsi.setSpeed(TRAIN_ID, 0);
+                        sleep(2000);
+                        tsi.setSpeed(TRAIN_ID, -speed);
+                        forwardDirection = !forwardDirection;
+                        // to North
+                    } else {
+                        //fourWay.release();
+                    }
+                }
+
+
             } catch (CommandException | InterruptedException ce) {
                 ce.printStackTrace();
                 System.out.println("CAT-ASTROPHE");
