@@ -20,7 +20,7 @@ public class Main {
 
         String map = args[0];
         int train1_speed = Integer.parseInt(args[1]);
-        int train2_speed = Integer.parseInt(args[2]);
+        int train2_speed = Integer.parseInt(args[2]); // * -1 ?
         int tsim_speed = (args.length >= 4) ? Integer.parseInt(args[3]) : 20;
 
         String tsim;
