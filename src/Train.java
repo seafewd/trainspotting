@@ -13,6 +13,8 @@ public class Train implements Runnable {
     private static boolean yellowInit = false;
     private static boolean brownInit = false;
 
+    // semaphores for different parts of the track
+    // see reference picture for colors
     static Semaphore yellow = new Semaphore(1);
     static Semaphore red = new Semaphore(1);
     static Semaphore blue = new Semaphore(1);
@@ -20,12 +22,22 @@ public class Train implements Runnable {
     static Semaphore brown = new Semaphore(1);
     static Semaphore crossing = new Semaphore(1);
 
+    /**
+     * Standard Train object, uses ID, speed and direction
+     * @param TRAIN_ID  Train ID
+     * @param speed     Train speed
+     * @param direction Train direction
+     */
     public Train(int TRAIN_ID, int speed, boolean direction) {
         this.TRAIN_ID = TRAIN_ID;
         this.speed = speed;
         this.forwardDirection = direction;
     }
 
+    /**
+     * Initial Train speed
+     * @param initSpeed Initial speed
+     */
     public void initSpeed(int initSpeed){
         try{
             tsi.setSpeed(TRAIN_ID, initSpeed);
@@ -35,6 +47,11 @@ public class Train implements Runnable {
         }
     }
 
+    /**
+     * Standard Train thread
+     * Runs checks to see if a train wants to enter a track. If another train is already present, try to acquire
+     * the semaphore and proceed when track is free.
+     */
     @Override
     public void run() {
         System.out.println("choo choo");
@@ -291,7 +308,7 @@ public class Train implements Runnable {
                 }
 
                 // Stop and turn at North Station B
-                if (se.getXpos() == 14 && se.getYpos() == 5 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection) {
+                if (activationCheck(14, 5, se, !forwardDirection)) {
                     tsi.setSpeed(TRAIN_ID, 0);
                     sleep(2000);
                     speed *= -1;
@@ -300,7 +317,7 @@ public class Train implements Runnable {
                 }
 
                 // Stop and turn at South Station A
-                if (se.getXpos() == 14 && se.getYpos() == 11 && se.getStatus() == SensorEvent.ACTIVE) {
+                if (activationCheck(14, 11, se)) {
                     if(forwardDirection){
                         tsi.setSpeed(TRAIN_ID, 0);
                         sleep(2000);
@@ -316,7 +333,7 @@ public class Train implements Runnable {
                 }
 
                 // Stop and turn at South Station B
-                if (se.getXpos() == 14 && se.getYpos() == 13 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection) {
+                if (activationCheck(14, 13, se, forwardDirection)) {
                     tsi.setSpeed(TRAIN_ID, 0);
                     sleep(2000);
                     speed *= -1;
@@ -329,5 +346,28 @@ public class Train implements Runnable {
                 System.out.println("CAT-ASTROPHE");
             }
         }
+    }
+
+    /**
+     * Based on sensor position, check if sensor is active. Used in run()
+     * @param xPos              Sensor x position
+     * @param yPos              Sensor y position
+     * @param se                Sensor event
+     * @param forwardDirection  Train direction
+     * @return                  Boolean
+     */
+    private boolean activationCheck(int xPos, int yPos, SensorEvent se, boolean forwardDirection) {
+        return se.getXpos() == xPos && se.getYpos() == yPos && se.getStatus() == SensorEvent.ACTIVE && forwardDirection;
+    }
+
+    /**
+     * Based on sensor position, check if sensor is active. Used in run()
+     * @param xPos              Sensor x position
+     * @param yPos              Sensor y position
+     * @param se                Sensor event
+     * @return                  Boolean
+     */
+    private boolean activationCheck(int xPos, int yPos, SensorEvent se) {
+        return se.getXpos() == xPos && se.getYpos() == yPos && se.getStatus() == SensorEvent.ACTIVE;
     }
 }
