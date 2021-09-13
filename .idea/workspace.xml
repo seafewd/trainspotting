@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="24748232-dc62-437d-adb7-147ea5830aa8" name="Default Changelist" comment="">
+    <list default="true" id="24748232-dc62-437d-adb7-147ea5830aa8" name="Default Changelist" comment="Seems to work. LOoOoOts of code duplication. Needs refactoring">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Train.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Train.java" afterDir="false" />
     </list>
@@ -56,12 +56,48 @@
       </method>
     </configuration>
     <configuration default="true" type="JetRunConfigurationType">
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
+      <module name="" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
     <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
       <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
+      <module name="" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="WORKING_DIRECTORY" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -85,7 +121,6 @@
       <workItem from="1630575975890" duration="2677000" />
       <workItem from="1630916875456" duration="11501000" />
       <workItem from="1631172764922" duration="3179000" />
-      <workItem from="1631513469056" duration="1462000" />
     </task>
     <task id="LOCAL−00001" summary="train1 goes back and forth">
       <created>1631188431272</created>
@@ -93,7 +128,13 @@
       <option name="presentableId" value="LOCAL−00001" />
       <updated>1631188431272</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL−00002" summary="Seems to work. LOoOoOts of code duplication. Needs refactoring">
+      <created>1631471163650</created>
+      <option name="number" value="LOCAL−00002" />
+      <option name="presentableId" value="LOCAL−00002" />
+      <updated>1631471163650</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -104,7 +145,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="train1 goes back and forth" />
-    <option name="LAST_COMMIT_MESSAGE" value="train1 goes back and forth" />
+    <MESSAGE value="Seems to work. LOoOoOts of code duplication. Needs refactoring" />
+    <option name="LAST_COMMIT_MESSAGE" value="Seems to work. LOoOoOts of code duplication. Needs refactoring" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -8,13 +8,13 @@ public class Train implements Runnable {
 
     private final int TRAIN_ID;
     private int speed;
-    private boolean forwardDirection;
+    private boolean forwardDirection; // forward direction = positive speed
     private final TSimInterface tsi = TSimInterface.getInstance();
-    private static boolean yellowInit = false;
-    private static boolean brownInit = false;
+    private static boolean yellowInit = false; // To acquire the starting segment
+    private static boolean brownInit = false; // To acquire the starting segment
 
-    // semaphores for different parts of the track
-    // see reference picture for colors
+    // Semaphores for different parts of the track
+    // See reference picture for colors
     static Semaphore yellow = new Semaphore(1);
     static Semaphore red = new Semaphore(1);
     static Semaphore blue = new Semaphore(1);
@@ -63,29 +63,24 @@ public class Train implements Runnable {
                 // ########################### From North to South ######################### //
 
                 // Want to enter Red coming from North Station A
-                if (se.getXpos() == 15 && se.getYpos() == 7 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
-                    tsi.setSpeed(TRAIN_ID, 0);
-                    red.acquire();
-                    tsi.setSwitch(17,7,TSimInterface.SWITCH_RIGHT);
-                    tsi.setSpeed(TRAIN_ID, speed);
+                if (activationCheck(15,7, se, forwardDirection)){
+                    acquireSegment(TRAIN_ID, speed, 17, 7, TSimInterface.SWITCH_RIGHT, red, tsi);
                 }
 
                 // Want to enter Red coming from North Station B
-                if (se.getXpos() == 15 && se.getYpos() == 8 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
-                    tsi.setSpeed(TRAIN_ID, 0);
-                    red.acquire();
-                    tsi.setSwitch(17,7,TSimInterface.SWITCH_LEFT);
-                    tsi.setSpeed(TRAIN_ID, speed);
+                if (activationCheck(15, 8, se, forwardDirection)){
+                    acquireSegment(TRAIN_ID, speed, 17, 7, TSimInterface.SWITCH_LEFT, red, tsi);
                 }
 
                 // Has entered red coming from North Station A
-                if (se.getXpos() == 19 && se.getYpos() == 7 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
+                if (activationCheck(19,7, se, forwardDirection)){
+                    // So as not to release a permit if not acquired
                     if(yellow.availablePermits() == 0)
                         yellow.release();
                 }
 
                 // Want to enter Blue coming from Red
-                if (se.getXpos() == 17 && se.getYpos() == 9 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection) {
+                if (activationCheck(17,9, se, forwardDirection)) {
                     tsi.setSpeed(TRAIN_ID, 0);
                     //Tries to acquire main track (blue), else flips the switch and continues on side track
                     if (blue.tryAcquire()) {
@@ -99,39 +94,33 @@ public class Train implements Runnable {
                 }
 
                 // Has entered Blue coming from Red
-                if (se.getXpos() == 13 && se.getYpos() == 9 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
+                if (activationCheck(13, 9, se, forwardDirection)){
                     red.release();
                 }
 
                 // Has entered Blue2 coming from Red
-                if (se.getXpos() == 13 && se.getYpos() == 10 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
+                if (activationCheck(13,10, se, forwardDirection)){
                     red.release();
                 }
 
                 // Want to enter Green coming from Blue
-                if (se.getXpos() == 6 && se.getYpos() == 9 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
-                    tsi.setSpeed(TRAIN_ID, 0);
-                    green.acquire(); // Waiting until acquired
-                    tsi.setSwitch(4,9,TSimInterface.SWITCH_LEFT);
-                    tsi.setSpeed(TRAIN_ID, speed);
+                if (activationCheck(6, 9, se, forwardDirection)){
+                    acquireSegment(TRAIN_ID, speed, 4, 9, TSimInterface.SWITCH_LEFT, green, tsi);
                 }
 
                 // Want to enter Green coming from Blue2 (side track)
-                if (se.getXpos() == 6 && se.getYpos() == 10 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
-                    tsi.setSpeed(TRAIN_ID, 0);
-                    green.acquire(); // Waiting until acquired
-                    tsi.setSwitch(4,9,TSimInterface.SWITCH_RIGHT);
-                    tsi.setSpeed(TRAIN_ID, speed);
+                if (activationCheck(6, 10, se, forwardDirection)){
+                    acquireSegment(TRAIN_ID, speed, 4, 9, TSimInterface.SWITCH_RIGHT, green, tsi);
                 }
 
                 // Has entered Green coming from Blue
-                if (se.getXpos() == 2 && se.getYpos() == 9 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
+                if (activationCheck(2, 9, se, forwardDirection)){
                     if(blue.availablePermits() == 0)
                         blue.release();
                 }
 
                 // Want to enter South Station coming from Green
-                if (se.getXpos() == 1 && se.getYpos() == 11 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection) {
+                if (activationCheck(1, 11, se, forwardDirection)) {
                     tsi.setSpeed(TRAIN_ID, 0);
                     if (brown.tryAcquire()) {
                         tsi.setSwitch(3,11,TSimInterface.SWITCH_LEFT);
@@ -142,41 +131,35 @@ public class Train implements Runnable {
                 }
 
                 // Has entered South Station A coming from Green
-                if (se.getXpos() == 5 && se.getYpos() == 11 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
+                if (activationCheck(5, 11, se, forwardDirection)){
                     green.release();
                 }
 
                 // Has entered South Station B coming from Green
-                if (se.getXpos() == 3 && se.getYpos() == 13 && se.getStatus() == SensorEvent.ACTIVE && forwardDirection){
+                if (activationCheck(3, 13, se, forwardDirection)){
                     green.release();
                 }
 
                 // ########################### From South to North ######################### //
 
                 // Want to enter Green coming from South Station A
-                if (se.getXpos() == 5 && se.getYpos() == 11 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
-                    tsi.setSpeed(TRAIN_ID, 0);
-                    green.acquire();
-                    tsi.setSwitch(3,11,TSimInterface.SWITCH_LEFT);
-                    tsi.setSpeed(TRAIN_ID, speed);
+                if (activationCheck(5, 11, se, !forwardDirection)){
+                    acquireSegment(TRAIN_ID, speed, 3, 11, TSimInterface.SWITCH_LEFT, green, tsi);
                 }
 
                 // Want to enter Green coming from South Station B
-                if (se.getXpos() == 3 && se.getYpos() == 13 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
-                    tsi.setSpeed(TRAIN_ID, 0);
-                    green.acquire();
-                    tsi.setSwitch(3,11,TSimInterface.SWITCH_RIGHT);
-                    tsi.setSpeed(TRAIN_ID, speed);
+                if (activationCheck(3, 13, se, !forwardDirection)){
+                    acquireSegment(TRAIN_ID, speed, 3, 11, TSimInterface.SWITCH_RIGHT, green, tsi);
                 }
 
                 // Has entered Green coming from South Station A
-                if (se.getXpos() == 1 && se.getYpos() == 11 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
+                if (activationCheck(1, 11, se, !forwardDirection)){
                     if(brown.availablePermits() == 0)
                         brown.release();
                 }
 
                 // Want to enter Blue coming from Green
-                if (se.getXpos() == 2 && se.getYpos() == 9 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection) {
+                if (activationCheck(2, 9, se, !forwardDirection)) {
                     tsi.setSpeed(TRAIN_ID, 0);
                     //Tries to acquire main track (blue), else flips the switch and continues on side track
                     if (blue.tryAcquire()) {
@@ -188,42 +171,33 @@ public class Train implements Runnable {
                 }
 
                 // Has entered Blue1 coming from Green
-                if (se.getXpos() == 6 && se.getYpos() == 9 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
+                if (activationCheck(6, 9, se, !forwardDirection)){
                     green.release();
                 }
 
                 // Has entered Blue2 coming from Green
-                if (se.getXpos() == 6 && se.getYpos() == 10 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
+                if (activationCheck(6, 10, se, !forwardDirection)){
                     green.release();
                 }
 
                 // Want to enter Red coming from Blue
-                if (se.getXpos() == 13 && se.getYpos() == 9 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
-                    tsi.setSpeed(TRAIN_ID, 0);
-                    red.acquire(); // Waiting until acquired
-                    //System.out.println("got red");
-                    tsi.setSwitch(15,9,TSimInterface.SWITCH_RIGHT);
-                    tsi.setSpeed(TRAIN_ID, speed);
+                if (activationCheck(13, 9, se, !forwardDirection)){
+                    acquireSegment(TRAIN_ID, speed, 15, 9, TSimInterface.SWITCH_RIGHT, red, tsi);
                 }
 
                 // Want to enter Red coming from Blue2
-                if (se.getXpos() == 13 && se.getYpos() == 10 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
-                    tsi.setSpeed(TRAIN_ID, 0);
-                    red.acquire(); // Waiting until acquired
-                    //System.out.println("got red");
-                    tsi.setSwitch(15,9,TSimInterface.SWITCH_LEFT);
-                    tsi.setSpeed(TRAIN_ID, speed);
+                if (activationCheck(13, 10, se, !forwardDirection)){
+                    acquireSegment(TRAIN_ID, speed, 15, 9, TSimInterface.SWITCH_LEFT, red, tsi);
                 }
 
                 // Has entered Red coming from Blue
-                if (se.getXpos() == 17 && se.getYpos() == 9 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
+                if (activationCheck(17, 9, se, !forwardDirection)){
                     if(blue.availablePermits() == 0)
                         blue.release();
-                    //System.out.println("got blue");
                 }
 
                 // Want to enter North Station coming from Red
-                if (se.getXpos() == 19 && se.getYpos() == 7 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection) {
+                if (activationCheck(19, 7, se, !forwardDirection)) {
                     tsi.setSpeed(TRAIN_ID, 0);
                     if (yellow.tryAcquire()) {
                         tsi.setSwitch(17,7,TSimInterface.SWITCH_RIGHT);
@@ -234,19 +208,19 @@ public class Train implements Runnable {
                 }
 
                 // Has entered North Station A coming from Red
-                if (se.getXpos() == 15 && se.getYpos() == 7 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
+                if (activationCheck(15, 7, se, !forwardDirection)){
                     red.release();
                 }
 
                 // Has entered North Station B coming from Red
-                if (se.getXpos() == 15 && se.getYpos() == 8 && se.getStatus() == SensorEvent.ACTIVE && !forwardDirection){
+                if (activationCheck(15, 8, se, !forwardDirection)){
                     red.release();
                 }
 
                 // ###################### Crossing ######################
 
                 // Want to pass horizontally (left)
-                if (se.getXpos() == 6 && se.getYpos() == 7 && se.getStatus() == SensorEvent.ACTIVE) {
+                if (activationCheck(6, 7, se)) {
                     if(forwardDirection){
                         tsi.setSpeed(TRAIN_ID, 0);
                         crossing.acquire();
@@ -257,7 +231,7 @@ public class Train implements Runnable {
                 }
 
                 // Want to pass horizontally (right)
-                if (se.getXpos() == 10 && se.getYpos() == 7 && se.getStatus() == SensorEvent.ACTIVE) {
+                if (activationCheck(10, 7, se)) {
                     if(!forwardDirection){
                         tsi.setSpeed(TRAIN_ID, 0);
                         crossing.acquire();
@@ -268,7 +242,7 @@ public class Train implements Runnable {
                 }
 
                 // Want to pass vertically (upper)
-                if (se.getXpos() == 8 && se.getYpos() == 5 && se.getStatus() == SensorEvent.ACTIVE) {
+                if (activationCheck(8, 5, se)) {
                     if(forwardDirection){
                         tsi.setSpeed(TRAIN_ID, 0);
                         crossing.acquire();
@@ -279,7 +253,7 @@ public class Train implements Runnable {
                 }
 
                 // Want to pass vertically (lower)
-                if (se.getXpos() == 10 && se.getYpos() == 8 && se.getStatus() == SensorEvent.ACTIVE) {
+                if (activationCheck(10, 8, se)) {
                     if(!forwardDirection){
                         tsi.setSpeed(TRAIN_ID, 0);
                         crossing.acquire();
@@ -292,7 +266,7 @@ public class Train implements Runnable {
                 // ###################### Stop and turn at stations ######################
 
                 // Stop and turn at North Station A
-                if (se.getXpos() == 14 && se.getYpos() == 3 && se.getStatus() == SensorEvent.ACTIVE) {
+                if (activationCheck(14, 3, se)) {
                     if(!forwardDirection){
                         tsi.setSpeed(TRAIN_ID, 0);
                         sleep(2000);
@@ -308,7 +282,7 @@ public class Train implements Runnable {
                 }
 
                 // Stop and turn at North Station B
-                if (activationCheck(14, 5, se, !forwardDirection)) {
+                if (activationCheck(14, 5, se)) {
                     tsi.setSpeed(TRAIN_ID, 0);
                     sleep(2000);
                     speed *= -1;
@@ -333,7 +307,7 @@ public class Train implements Runnable {
                 }
 
                 // Stop and turn at South Station B
-                if (activationCheck(14, 13, se, forwardDirection)) {
+                if (activationCheck(14, 13, se)) {
                     tsi.setSpeed(TRAIN_ID, 0);
                     sleep(2000);
                     speed *= -1;
@@ -353,11 +327,11 @@ public class Train implements Runnable {
      * @param xPos              Sensor x position
      * @param yPos              Sensor y position
      * @param se                Sensor event
-     * @param forwardDirection  Train direction
+     * @param direction  Train direction
      * @return                  Boolean
      */
-    private boolean activationCheck(int xPos, int yPos, SensorEvent se, boolean forwardDirection) {
-        return se.getXpos() == xPos && se.getYpos() == yPos && se.getStatus() == SensorEvent.ACTIVE && forwardDirection;
+    private boolean activationCheck(int xPos, int yPos, SensorEvent se, boolean direction) {
+        return se.getXpos() == xPos && se.getYpos() == yPos && se.getStatus() == SensorEvent.ACTIVE && direction;
     }
 
     /**
@@ -369,5 +343,32 @@ public class Train implements Runnable {
      */
     private boolean activationCheck(int xPos, int yPos, SensorEvent se) {
         return se.getXpos() == xPos && se.getYpos() == yPos && se.getStatus() == SensorEvent.ACTIVE;
+    }
+
+    /**
+     * Sets speed to 0,
+     * waits to acquire permit,
+     * sets the switch
+     * sets the speed back up to the initial speed
+     *
+     * @param trainID
+     * @param speed
+     * @param switchPosX
+     * @param switchPosY
+     * @param switchDir right or left
+     * @param sem the segment
+     * @param tsi TSim interface
+     */
+
+    private void acquireSegment(int trainID, int speed, int switchPosX, int switchPosY, int switchDir, Semaphore sem, TSimInterface tsi){
+        try {
+            tsi.setSpeed(trainID, 0); // Sets speed to 0 to wait on passing train
+            sem.acquire(); // Waiting until acquired
+            tsi.setSwitch(switchPosX, switchPosY, switchDir);
+            tsi.setSpeed(trainID, speed);
+        } catch (CommandException | InterruptedException ce) {
+            ce.printStackTrace();
+            System.out.println("CAT-ASTROPHE");
+        }
     }
 }
