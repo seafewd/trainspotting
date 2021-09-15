@@ -60,6 +60,11 @@ public class Train implements Runnable {
             try {
                 SensorEvent se = tsi.getSensor(TRAIN_ID);
 
+                // To avoid double triggers
+                if (se.getStatus() == 2) {
+                    continue;
+                }
+
                 // ########################### From North to South ######################### //
 
                 // Want to enter Red coming from North Station A
